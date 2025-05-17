@@ -263,23 +263,21 @@ async def send_daily_summary(app):
         print("[DAILY] VIP report sent.")
 
 # === Main ===
-async def main():
+if __name__ == "__main__":
+    import asyncio
+    from telegram.ext import ApplicationBuilder
+    from telegram.ext import MessageHandler, filters
+
     init_db()
     app = ApplicationBuilder().token(VIP_BOT_TOKEN).build()
 
     app.add_handler(MessageHandler(filters.Chat(VIP_CHANNEL_ID) & filters.TEXT, handle_vip_message))
 
-    # Background tasks
-    asyncio.create_task(monitor_multipliers(app))
-    asyncio.create_task(send_daily_summary(app))
+    # Define an async wrapper
+    async def run():
+        asyncio.create_task(monitor_multipliers(app))
+        asyncio.create_task(send_daily_summary(app))
+        print("[BOT] Starting...")
+        await app.run_polling()
 
-    print("[BOT] Starting...")
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-    await app.updater.idle()
-
-if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(main())
-    loop.run_forever()
+    asyncio.run(run())
