@@ -140,7 +140,8 @@ async def handle_vip_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
         "message_id": msg.message_id  # Save initial post message ID here
     }
     upsert_ca(ca, tracked[ca])
-    print(f"[TRACKING] {ca} - {data['name']}")
+    print(f"[TRACKING] {data['name']} - Initial MC: {data['initial_mc']}")
+
 
 async def monitor_multipliers(app):
     while True:
@@ -201,7 +202,7 @@ async def monitor_multipliers(app):
 async def send_daily_summary(app):
     while True:
         now = datetime.now(timezone.utc)
-        next_run = now + timedelta(seconds=60)
+        next_run = datetime.combine(now.date(), datetime.min.time(), tzinfo=timezone.utc) + timedelta(hours=23, minutes=58)
         if now >= next_run:
             next_run += timedelta(days=1)
         await asyncio.sleep((next_run - now).total_seconds())
@@ -229,7 +230,7 @@ async def send_daily_summary(app):
 
 🎯 Hit Rate: {hit_rate}%
 
-<b> 🔥Top 5 VIP Plays:</b>"""
+<b> 🔥Top 5 VIP CALLS:</b>"""
 
         if top_5:
             for i, (sym, multi) in enumerate(top_5, 1):
