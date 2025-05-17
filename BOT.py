@@ -14,7 +14,7 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 
 # === Setup ===
 load_dotenv()
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+VIP_BOT_TOKEN = os.getenv("BOT_TOKEN")
 VIP_CHANNEL_ID = int(os.getenv("VIP_CHANNEL_ID"))
 VIP_CHANNEL_USERNAME = os.getenv("VIP_CHANNEL_USERNAME", "yourvipchannel")
 
@@ -265,7 +265,7 @@ async def send_daily_summary(app):
 # === Main ===
 async def main():
     init_db()
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app = ApplicationBuilder().token(VIP_BOT_TOKEN).build()
 
     app.add_handler(MessageHandler(filters.Chat(VIP_CHANNEL_ID) & filters.TEXT, handle_vip_message))
 
