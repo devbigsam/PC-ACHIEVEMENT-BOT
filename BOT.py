@@ -265,4 +265,13 @@ async def send_daily_summary(app):
 # === Main ===
 async def main():
     init_db()
-    app = ApplicationBuilder
+    app = ApplicationBuilder().token(BOT_TOKEN).build()
+
+    app.add_handler(MessageHandler(filters.Chat(VIP_CHANNEL_ID) & filters.TEXT, handle_vip_message))
+
+    # Background tasks
+    asyncio.create_task(monitor_multipliers(app))
+    asyncio.create_task(send_daily_summary(app))
+
+    print("[BOT] Starting...")
+    await app.run_polling()
