@@ -167,16 +167,16 @@ async def monitor_multipliers(app):
                 caption = f"""
                 🚀 <b>VIP UPDATE</b>
                 
-                Name: {info['name']}
+Name: {info['name']}
                 
-                Symbol: ${info['symbol']}
+Symbol: ${info['symbol']}
                 
-                💵 <b>{next_target}x from Entry!!</b>
+💵 <b>{next_target}x from Entry!!</b>
                 
-                From {format_mc(start)} ➡️ {format_mc(current)} 🤯
+From {format_mc(start)} ➡️ {format_mc(current)} 🤯
                 
-                📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b>
-                """
+📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b>
+"""
                 
                 photo_path = "gifs/general-update.png"  
                 if os.path.exists(photo_path):
