@@ -174,31 +174,28 @@ Symbol: ${info['symbol']}
 From {format_mc(start)} ➡️ {format_mc(current)} 🤯
 
 📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b>
+                """
 
-"""
-
-               
-
-            photo_path = "gifs/general-update.png"  
-            if os.path.exists(photo_path):
-                await app.bot.send_photo(
-                    chat_id=VIP_CHANNEL_ID,
-                    photo=open(photo_path, "rb"),
-                    caption=caption.strip(),
-                    parse_mode=ParseMode.HTML,
-                    reply_to_message_id=info["message_id"],  # Reply to initial message
+                photo_path = "gifs/general-update.png"  
+                if os.path.exists(photo_path):
+                    await app.bot.send_photo(
+                        chat_id=VIP_CHANNEL_ID,
+                        photo=open(photo_path, "rb"),
+                        caption=caption.strip(),
+                        parse_mode=ParseMode.HTML,
+                        reply_to_message_id=info["message_id"],
                     )
-            else:
-                await app.bot.send_message(
-                    chat_id=VIP_CHANNEL_ID,
-                    text=caption.strip(),
-                    parse_mode=ParseMode.HTML,
-                    reply_to_message_id=info["message_id"],  # Reply to initial message
+                else:
+                    await app.bot.send_message(
+                        chat_id=VIP_CHANNEL_ID,
+                        text=caption.strip(),
+                        parse_mode=ParseMode.HTML,
+                        reply_to_message_id=info["message_id"],
                     )
-
 
                 print(f"[VIP UPDATE] {ca} - {next_target}x")
         await asyncio.sleep(60)
+
 
 # === Daily Summary ===
 async def send_daily_summary(app):
