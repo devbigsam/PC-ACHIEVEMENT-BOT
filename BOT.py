@@ -194,8 +194,8 @@ async def monitor_multipliers(app):
                         reply_to_message_id=info["message_id"],  # Reply to initial message
                         )
                     print(f"[VIP UPDATE] {ca} - {next_target}x")
-                    
-                    await asyncio.sleep(60)
+
+        await asyncio.sleep(60)
 
 # === Daily Summary ===
 async def send_daily_summary(app):
@@ -237,7 +237,7 @@ async def send_daily_summary(app):
                 
             msg += f"\n\n 💭💬 {get_random_quote(top_5[0][0], f'{top_5[0][1]:.1f}')}"
         else:
-            msg += "\n\nNo calls hit 2x today. Let's push harder tomorrow!"
+            msg += "\n\nThere were no winners today 😓. Let's push harder tomorrow 💪!!"
 
 
         image_path = "gifs/daily-report.png"
