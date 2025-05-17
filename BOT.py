@@ -201,7 +201,7 @@ From {format_mc(start)} ➡️ {format_mc(current)} 🤯
 async def send_daily_summary(app):
     while True:
         now = datetime.now(timezone.utc)
-        next_run = datetime.combine(now.date(), datetime.min.time(), tzinfo=timezone.utc) + timedelta(hours=23, minutes=58)
+        next_run = now + timedelta(seconds=60)
         if now >= next_run:
             next_run += timedelta(days=1)
         await asyncio.sleep((next_run - now).total_seconds())
