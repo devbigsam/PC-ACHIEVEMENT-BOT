@@ -14,9 +14,8 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 
 # === Setup ===
 load_dotenv()
-VIP_BOT_TOKEN = os.getenv("BOT_TOKEN")
+VIP_BOT_TOKEN = os.getenv("VIP_BOT_TOKEN")
 VIP_CHANNEL_ID = int(os.getenv("VIP_CHANNEL_ID"))
-VIP_CHANNEL_USERNAME = os.getenv("VIP_CHANNEL_USERNAME", "yourvipchannel")
 
 CA_PATTERN = r"\b[a-zA-Z0-9]{44}\b"
 DB_FILE = "tracked_vip.db"
