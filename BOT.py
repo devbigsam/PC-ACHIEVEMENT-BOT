@@ -140,7 +140,7 @@ async def handle_vip_message(update: Update, context: ContextTypes.DEFAULT_TYPE)
         "message_id": msg.message_id  # Save initial post message ID here
     }
     upsert_ca(ca, tracked[ca])
-    print(f"[TRACKING] {ca} - {data['name']}")
+    print(f"[TRACKING] {data['name']} - data['mc']")
 
 async def monitor_multipliers(app):
     while True:
