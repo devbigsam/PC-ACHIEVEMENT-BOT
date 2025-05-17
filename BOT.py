@@ -204,7 +204,7 @@ From {format_mc(start)} ➡️ {format_mc(current)} 🤯
 async def send_daily_summary(app):
     while True:
         now = datetime.now(timezone.utc)
-        next_run = now + timedelta(seconds=60)
+        next_run = datetime.combine(now.date(), datetime.min.time(), tzinfo=timezone.utc) + timedelta(hours=23, minutes=58)
         if now >= next_run:
             next_run += timedelta(days=1)
         await asyncio.sleep((next_run - now).total_seconds())
@@ -240,7 +240,7 @@ async def send_daily_summary(app):
                 
             msg += f"\n\n 💭💬 {get_random_quote(top_5[0][0], f'{top_5[0][1]:.1f}')}"
         else:
-            msg += "\n\nNo calls hit 2x today. Let's push harder tomorrow!"
+            msg += "\n\nThere were no winners today 😓. Let's push harder tomorrow 💪!!"
 
 
         image_path = "gifs/daily-report.png"
@@ -262,7 +262,7 @@ async def send_daily_summary(app):
         print("[DAILY] VIP report sent.")
 
 # === Main ===
-async def main():
+async def run_bot():
     init_db()
     app = ApplicationBuilder().token(VIP_BOT_TOKEN).build()
 
@@ -275,10 +275,16 @@ async def main():
     print("[BOT] Starting...")
     await app.initialize()
     await app.start()
-    await app.updater.start_polling()
-    await app.updater.idle()
+    await app.run_polling()  # this runs the bot and keeps it alive
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(main())
-    loop.run_forever()
+    try:
+        asyncio.run(run_bot())
+    except RuntimeError as e:
+        # For Railway and environments that already run an event loop
+        if str(e).startswith("This event loop is already running"):
+            loop = asyncio.get_event_loop()
+            loop.create_task(run_bot())
+            loop.run_forever()
+        else:
+            raise
