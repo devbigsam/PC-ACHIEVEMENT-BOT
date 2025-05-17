@@ -262,19 +262,21 @@ async def send_daily_summary(app):
         print("[DAILY] VIP report sent.")
 
 # === Main ===
-async def main():
+def main():
     init_db()
     app = ApplicationBuilder().token(VIP_BOT_TOKEN).build()
 
     app.add_handler(MessageHandler(filters.Chat(VIP_CHANNEL_ID) & filters.TEXT, handle_vip_message))
 
-    # Background tasks
-    asyncio.create_task(monitor_multipliers(app))
-    asyncio.create_task(send_daily_summary(app))
-    
-    print("[BOT] Starting...")
-    await app.run_polling()
+    # Start background tasks after bot is running
+    async def on_startup(app):
+        asyncio.create_task(monitor_multipliers(app))
+        asyncio.create_task(send_daily_summary(app))
 
+    app.post_init = on_startup
+
+    print("[BOT] Starting...")
+    app.run_polling()  # This blocks and handles its own event loop
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
