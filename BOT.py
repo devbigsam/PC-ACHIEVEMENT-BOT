@@ -14,7 +14,7 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 
 # === Setup ===
 load_dotenv()
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+BOT_TOKEN = os.getenv("VIP_BOT_TOKEN")
 VIP_CHANNEL_ID = int(os.getenv("VIP_CHANNEL_ID"))
 VIP_CHANNEL_USERNAME = os.getenv("VIP_CHANNEL_USERNAME", "yourvipchannel")
 
@@ -236,7 +236,7 @@ async def send_daily_summary(app):
                 
             msg += f"\n\n{get_random_quote}"
         else:
-            msg += "\n\There were no winnings today 😓. Let's push harder tomorrow 💪!!"
+            msg += "\n\nThere were no winnings today 😓. Let's push harder tomorrow 💪!!"
 
 
         image_path = "images/daily-report.png"  # Change path as needed
