@@ -14,9 +14,8 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 
 # === Setup ===
 load_dotenv()
-BOT_TOKEN = os.getenv("VIP_BOT_TOKEN")
+VIP_BOT_TOKEN = os.getenv("VIP_BOT_TOKEN")
 VIP_CHANNEL_ID = int(os.getenv("VIP_CHANNEL_ID"))
-VIP_CHANNEL_USERNAME = os.getenv("VIP_CHANNEL_USERNAME", "yourvipchannel")
 
 CA_PATTERN = r"\b[a-zA-Z0-9]{44}\b"
 DB_FILE = "tracked_vip.db"
@@ -85,11 +84,16 @@ def format_mc(mc):
         return f"{mc / 1_000:.2f}K"
     return f"{mc:.2f}"
 
-def get_random_quote():
-    with open("quotes.txt", "r", encoding="utf-8") as f:
-        quotes = f.readlines()
-    return random.choice(quotes).strip()
-
+def get_random_quote(top_token=None, highest_multiplier=None):
+    try:
+        with open("quotes.txt", "r", encoding="utf-8") as f:
+            quotes = f.readlines()
+        quote = random.choice(quotes).strip()
+        if top_token:
+            quote = quote.replace("{highest_ticker}", top_token).replace("{highest_multiplier}", highest_multiplier)
+        return quote
+    except Exception:
+        return "Join the VIP club and catch them early with Big Sam. 🔥"
 
 async def fetch_token_data(ca):
     try:
@@ -165,34 +169,33 @@ Name: {info['name']}
 
 Symbol: ${info['symbol']}
 
-💵 <b>{next_target}x from Entry !!</b>
+💵 <b>{next_target}x from Entry!!</b>
 
 From {format_mc(start)} ➡️ {format_mc(current)} 🤯
 
-📊 <a href="https://dexscreener.com/solana/{ca}">View Stats</a>
+📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b>
+
 """
 
-            
-                # Send image instead of GIF
-                image_path = "images/general-update.png"  # Change path as needed
-                if os.path.exists(image_path):
-                    with open(image_path, "rb") as img_file:
-                        await app.bot.send_photo(
-                            chat_id=VIP_CHANNEL_ID,
-                            photo=img_file,
-                            caption=caption.strip(),
-                            parse_mode=ParseMode.HTML,
-                            reply_to_message_id=info["message_id"],
-        
-                        )
-                else:
-                    await app.bot.send_message(
-                        chat_id=VIP_CHANNEL_ID,
-                        text=caption.strip(),
-                        parse_mode=ParseMode.HTML,
-                        reply_to_message_id=info["message_id"],
-                      
+               
+
+            photo_path = "gifs/general-update.png"  
+            if os.path.exists(photo_path):
+                await app.bot.send_photo(
+                    chat_id=VIP_CHANNEL_ID,
+                    photo=open(photo_path, "rb"),
+                    caption=caption.strip(),
+                    parse_mode=ParseMode.HTML,
+                    reply_to_message_id=info["message_id"],  # Reply to initial message
                     )
+            else:
+                await app.bot.send_message(
+                    chat_id=VIP_CHANNEL_ID,
+                    text=caption.strip(),
+                    parse_mode=ParseMode.HTML,
+                    reply_to_message_id=info["message_id"],  # Reply to initial message
+                    )
+
 
                 print(f"[VIP UPDATE] {ca} - {next_target}x")
         await asyncio.sleep(60)
@@ -225,70 +228,57 @@ async def send_daily_summary(app):
 
 📅 Date: {today_str}
 
-📈 Total Calls: {total}
+📊 Total Calls: {total}
 
-🔥 Hit Rate: {hit_rate}%
+🎯 Hit Rate: {hit_rate}%
 
-<b>Top 5 VIP Plays:</b>"""
+<b> 🔥Top 5 VIP Plays:</b>"""
+
         if top_5:
             for i, (sym, multi) in enumerate(top_5, 1):
                 msg += f"\n{i}. ${sym} – {multi:.1f}x"
                 
-            msg += f"\n\n{get_random_quote}"
+            msg += f"\n\n 💭💬 {get_random_quote(top_5[0][0], f'{top_5[0][1]:.1f}')}"
         else:
-            msg += "\n\nThere were no winnings today 😓. Let's push harder tomorrow 💪!!"
+            msg += "\n\nNo calls hit 2x today. Let's push harder tomorrow!"
 
 
-        image_path = "gifs/daily-report.png"  # Change path as needed
+        image_path = "gifs/daily-report.png"
         if os.path.exists(image_path):
-            with open(image_path, "rb") as img_file:
-                await app.bot.send_photo(
-                    chat_id=VIP_CHANNEL_ID,
-                    photo=img_file,
-                    caption=msg,
-                    parse_mode=ParseMode.HTML,
-                   
-                )
+            await app.bot.send_photo(
+                chat_id=VIP_CHANNEL_ID,
+                photo=open(image_path, "rb"),
+                caption=msg,
+                parse_mode=ParseMode.HTML,
+                
+            )
         else:
             await app.bot.send_message(
                 chat_id=VIP_CHANNEL_ID,
                 text=msg,
                 parse_mode=ParseMode.HTML,
-               
+                
             )
         print("[DAILY] VIP report sent.")
 
 # === Main ===
 async def main():
     init_db()
-    app = ApplicationBuilder().token(BOT_TOKEN).build()
+    app = ApplicationBuilder().token(VIP_BOT_TOKEN).build()
 
-    # Register handler for VIP channel messages (for tracking CA)
-    app.add_handler(MessageHandler(
-        filters.Chat(chat_id=VIP_CHANNEL_ID) & (filters.TEXT | filters.Caption),
-        handle_vip_message
-    ))
+    app.add_handler(MessageHandler(filters.Chat(VIP_CHANNEL_ID) & filters.TEXT, handle_vip_message))
 
-    # Start background tasks for monitoring and daily summary
-    async def background_tasks():
-        await asyncio.gather(
-            monitor_multipliers(app),
-            send_daily_summary(app),
-        )
+    # Background tasks
+    asyncio.create_task(monitor_multipliers(app))
+    asyncio.create_task(send_daily_summary(app))
 
-    # Initialize the application before starting it
+    print("[BOT] Starting...")
     await app.initialize()
-
-    # Run the bot and background tasks concurrently
-    await asyncio.gather(
-        app.start(),
-        background_tasks()
-    )
-
-    # Properly stop the bot on exit
-    await app.stop()
-    await app.shutdown()  # clean shutdown to release resources
+    await app.start()
+    await app.updater.start_polling()
+    await app.updater.idle()
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    loop.create_task(main())
+    loop.run_forever()
