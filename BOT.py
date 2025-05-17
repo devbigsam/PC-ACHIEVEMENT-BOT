@@ -264,7 +264,10 @@ async def main():
     app = ApplicationBuilder().token(BOT_TOKEN).build()
 
     # Register handler for VIP channel messages (for tracking CA)
-    app.add_handler(MessageHandler(filters.Chat(chat_id=VIP_CHANNEL_ID) & (filters.TEXT | filters.Caption), handle_vip_message))
+    app.add_handler(MessageHandler(
+        filters.Chat(chat_id=VIP_CHANNEL_ID) & (filters.TEXT | filters.Caption),
+        handle_vip_message
+    ))
 
     # Start background tasks for monitoring and daily summary
     async def background_tasks():
@@ -273,14 +276,18 @@ async def main():
             send_daily_summary(app),
         )
 
+    # Initialize the application before starting it
+    await app.initialize()
+
     # Run the bot and background tasks concurrently
     await asyncio.gather(
         app.start(),
         background_tasks()
     )
 
-    # Properly stop the bot on exit (optional)
+    # Properly stop the bot on exit
     await app.stop()
+    await app.shutdown()  # clean shutdown to release resources
 
 if __name__ == "__main__":
     import asyncio
