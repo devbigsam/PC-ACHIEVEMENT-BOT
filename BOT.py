@@ -179,16 +179,16 @@ From {format_mc(start)} ➡️ {format_mc(current)} 🤯
 
                
 
-            photo_path = "gifs/general-update.png"  
-            if os.path.exists(photo_path):
-                await app.bot.send_photo(
+        photo_path = "gifs/general-update.png"  
+        if os.path.exists(photo_path):
+            await app.bot.send_photo(
                     chat_id=VIP_CHANNEL_ID,
                     photo=open(photo_path, "rb"),
                     caption=caption.strip(),
                     parse_mode=ParseMode.HTML,
                     reply_to_message_id=info["message_id"],  # Reply to initial message
                     )
-            else:
+        else:
                 await app.bot.send_message(
                     chat_id=VIP_CHANNEL_ID,
                     text=caption.strip(),
@@ -271,14 +271,10 @@ async def main():
     # Background tasks
     asyncio.create_task(monitor_multipliers(app))
     asyncio.create_task(send_daily_summary(app))
-
+    
     print("[BOT] Starting...")
-    await app.initialize()
-    await app.start()
-    await app.updater.start_polling()
-    await app.updater.idle()
+    await app.run_polling()
+
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    loop.create_task(main())
-    loop.run_forever()
+    asyncio.run(main())
