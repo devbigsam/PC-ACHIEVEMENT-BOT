@@ -239,7 +239,7 @@ async def send_daily_summary(app):
             msg += "\n\nThere were no winnings today 😓. Let's push harder tomorrow 💪!!"
 
 
-        image_path = "images/daily-report.png"  # Change path as needed
+        image_path = "gifs/daily-report.png"  # Change path as needed
         if os.path.exists(image_path):
             with open(image_path, "rb") as img_file:
                 await app.bot.send_photo(
