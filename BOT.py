@@ -237,6 +237,7 @@ async def send_daily_summary(app):
 
 <b>🔥 Top 5 VIP CALLS:</b>\n"""
 
+
         if top_5:
             for i, (sym, multi) in enumerate(top_5, 1):
                 msg += f"\n{i}. ${sym} – {multi:.1f}x"
