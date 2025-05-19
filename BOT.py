@@ -165,18 +165,18 @@ async def monitor_multipliers(app):
                 upsert_ca(ca, info)
                 
                 caption = f"""
-                🚀 <b>VIP UPDATE</b>
+🚀 <b>VIP UPDATE</b>
                 
-                Name: {info['name']}
+Name: {info['name']}
                 
-                Symbol: ${info['symbol']}
+Symbol: ${info['symbol']}
                 
-                💵 <b>{next_target}x from Entry!!</b>
+💵 <b>{next_target}x from Entry!!</b>
                 
-                From {format_mc(start)} ➡️ {format_mc(current)} 🤯
+ From {format_mc(start)} ➡️ {format_mc(current)} 🤯
                 
-                📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b>
-                """
+📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b> |<b><a href ="https://t.me/+WA349DDOLTo2YjZk" Share PNLs</a></b>
+"""
                 
                 photo_path = "gifs/general-update.png"  
                 if os.path.exists(photo_path):
@@ -221,16 +221,21 @@ async def send_daily_summary(app):
         hit_rate = round((len(hits) / total * 100), 1) if total else 0
         top_5 = sorted(hits, key=lambda x: x[1], reverse=True)[:5]
 
+        # NEW: Calculate Returns and Average Multiplier
+        returns = sum([max(c["multipliers"]) for c in today_calls if c["multipliers"]])
+        average = round(returns / total, 2) if total else 0
+
         today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-        msg = f"""📊 <b>VIP Daily Report | PRIVATE CLUB</b>
+        msg = f"""🏆 <b>VIP Daily Report | PRIVATE CLUB</b>
 
 📅 Date: {today_str}
 
 📊 Total Calls: {total}
-
 🎯 Hit Rate: {hit_rate}%
+💹 Returns: {returns:.1f}x
+📈 Average: {average:.2f}x
 
-<b> 🔥Top 5 VIP CALLS:</b>"""
+<b>🔥 Top 5 VIP CALLS:</b>\n"""
 
         if top_5:
             for i, (sym, multi) in enumerate(top_5, 1):
