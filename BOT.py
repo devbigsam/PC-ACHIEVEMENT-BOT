@@ -173,10 +173,10 @@ Symbol: ${info['symbol']}
                 
 💵 <b>{next_target}x from Entry!!</b>
                 
- From {format_mc(start)} ➡️ {format_mc(current)} 🤯
+                From {format_mc(start)} ➡️ {format_mc(current)} 🤯
                 
-📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b> |<b><a href ="https://t.me/+WA349DDOLTo2YjZk" Share PNLs</a></b>
-"""
+                📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b>
+                """
                 
                 photo_path = "gifs/general-update.png"  
                 if os.path.exists(photo_path):
