@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.constants import ParseMode
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
+from pnl_generator import generate_pnl_image
+from telegram.ext import CallbackQueryHandler
+
 
 # === Setup ===
 load_dotenv()
@@ -158,10 +161,12 @@ async def monitor_multipliers(app):
 
             multiplier = current / start
             next_target = int(multiplier)
+            
 
             if next_target > max(info["multipliers"], default=1):
                 
                 info["multipliers"].append(next_target)
+                tracked[ca]["current_mult"] = multiplier
                 upsert_ca(ca, info)
                 
                 caption = f"""
@@ -175,7 +180,7 @@ Symbol: ${info['symbol']}
                 
 From {format_mc(start)} ➡️ {format_mc(current)} 🤯
                 
-📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b>
+📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b> | 🖼️ <b><a href="https://t.me/bigsamachievement_bot?start={ca}">View PNL</a></b>
 """
                 
                 photo_path = "gifs/general-update.png"  
@@ -263,10 +268,73 @@ async def send_daily_summary(app):
             )
         print("[DAILY] VIP report sent.")
 
+
+from telegram.ext import CommandHandler
+
+async def pnl_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    if not args:
+        # Add delete button here as well (optional)
+        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🗑️", callback_data="delete")]])
+        await update.message.reply_text("Usage: /pnl <contract_address>", reply_markup=keyboard)
+        return
+
+    ca = args[0]
+    tracked = get_tracked()
+    if ca not in tracked:
+        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🗑️", callback_data="delete")]])
+        await update.message.reply_text("❌ Coin not found. Can't generate flex.", reply_markup=keyboard)
+        return
+
+    bio = await generate_pnl_image(tracked[ca])
+    if bio is None:
+        keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🗑️", callback_data="delete")]])
+        await update.message.reply_text("❌ PNL templates missing, cannot generate image.", reply_markup=keyboard)
+        return
+
+    # For photo replies, reply_photo also accepts reply_markup
+    keyboard = InlineKeyboardMarkup([[InlineKeyboardButton("🗑️", callback_data="delete")]])
+    await update.message.reply_photo(photo=bio, reply_markup=keyboard)
+
+async def delete_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    await query.answer()  # Acknowledge the callback
+
+    # Delete the message with the button (the reply)
+    await query.message.delete()
+
+    # Also delete the message it was replying to, if any
+    if query.message.reply_to_message:
+        await query.message.reply_to_message.delete()
+
+
+async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    args = context.args
+    if args:
+        ca = args[0]
+        tracked = get_tracked()
+        if ca not in tracked:
+            await update.message.reply_text("❌ Coin not found. Can't generate flex.")
+            return
+
+        bio = await generate_pnl_image(tracked[ca])
+        if bio is None:
+            await update.message.reply_text("❌ PNL templates missing, cannot generate image.")
+            return
+
+        await update.message.reply_photo(photo=bio)
+    else:
+        await update.message.reply_text("Welcome to BIG SAM PRIVATE CLUB ACHIEVEMENT BOT (Still on Beta Mode)!\n\nUse /pnl <contract_address> to flex our calls.")
+
 # === Main ===
 def main():
     init_db()
     app = ApplicationBuilder().token(VIP_BOT_TOKEN).build()
+    app.add_handler(CommandHandler("pnl", pnl_command))
+    app.add_handler(CommandHandler("start", start_command))
+    
+    
+    app.add_handler(CallbackQueryHandler(delete_callback, pattern="^delete$"))
 
     app.add_handler(MessageHandler(filters.Chat(VIP_CHANNEL_ID) & filters.TEXT, handle_vip_message))
 
