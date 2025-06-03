@@ -35,7 +35,7 @@ def get_text_size(draw, text, font):
 
 async def generate_pnl_image(ca_data):
     # Pick random template
-    template_num = random.randint(1, 5)
+    template_num = random.randint(1, 10)
     template_path = f"pnl_templates/pnl_template_{template_num}.png"
 
     if not os.path.exists(template_path):
