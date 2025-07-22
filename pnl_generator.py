@@ -60,7 +60,7 @@ async def generate_pnl_image(ca_data):
     mc_text = f"Called at {format_mc(ca_data['initial_mc'])}"
     max_mult = max(ca_data["multipliers"]) if ca_data["multipliers"] else 1
     mult_text = f"{max_mult}x"
-    footer_text = "BIG SAM PRIVATE CLUB"  # No emoji here, we will paste the emoji image
+    footer_text = "PUMPFUN VIP ALERT"  # No emoji here, we will paste the emoji image
 
     width, height = image.size
 

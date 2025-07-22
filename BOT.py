@@ -305,7 +305,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE,):
             await update.message.reply_photo(photo=bio)
     else:
         await update.message.reply_text(
-            "Welcome to BIG SAM PRIVATE CLUB ACHIEVEMENT BOT (Still on Beta Mode)!\n\n"
+            "Welcome to BIG SAM PUMPFUN VIP ALERT ACHIEVEMENT BOT (Still on Beta Mode)!\n\n"
             "Use /pnl <contract_address> to flex our calls."
         )
 
@@ -428,14 +428,14 @@ async def leaderboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE
 
     header_link = (
     f'<b><a href="https://t.me/{bot_username}?start=gpnl_{timeframe_for_link}">'
-    "BIG SAM PRIVATE CLUB 💎👾⚡️</a></b>"
+    "PUMPFUN VIP ALERT 💎👾⚡️</a></b>"
 )
 
 
     # Your existing lines for stats
     lines = [
     f"🏰 {header_link}\n",
-    "📊 <b>PRIVATE CLUB STATS</b>",
+    "📊 <b>PUMPFUN VIP STATS</b>",
     f" ├ <code>Period</code>: <b>{timeframe_arg}</b>",
     f" ├ <code>Calls</code>: <b>{total_calls}</b>",
     f" ├ <code>Hit Rate</code>: <b>{hit_rate:.0%}</b>",
@@ -448,7 +448,7 @@ async def leaderboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     for i, (max_x, name, symbol, ca) in enumerate(top_10, 1):
         emoji = emojis[i-1]
         url = f"https://dexscreener.com/solana/{ca}"
-        blockquote_lines.append(f"<b>{emoji}{i}. <a href='{url}'>${symbol}</a> » BIG SAM PRIVATE CLUB 💎👾⚡️ [{max_x:}x]</b>")
+        blockquote_lines.append(f"<b>{emoji}{i}. <a href='{url}'>${symbol}</a> » PUMPFUN VIP ALERT 💎👾⚡️ [{max_x:}x]</b>")
         
     lines.append("<blockquote>" + "\n".join(blockquote_lines) + "\n</blockquote>")
     lines.append(f'\n<b><a href="https://x.com/bigsamkoll">📚 Learn More...</a></b>')
