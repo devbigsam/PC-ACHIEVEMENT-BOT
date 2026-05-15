@@ -38,7 +38,7 @@ load_dotenv()
 VIP_BOT_TOKEN = os.getenv("VIP_BOT_TOKEN")
 VIP_CHANNEL_ID = int(os.getenv("VIP_CHANNEL_ID"))
 
-CA_PATTERN = r"\b[a-zA-Z0-9]{44}\b"
+CA_PATTERN = r"[A-Za-z0-9]{43,45}"
 DB_FILE = "tracked_vip.db"
 
 # === Database ===
@@ -188,7 +188,7 @@ async def monitor_multipliers(app):
                 upsert_ca(ca, info)
                 
                 caption = f"""
-🚀 <b>VIP UPDATE</b>
+🚀 <b>CALL UPDATE</b>
                 
 Name: {info['name']}
                 
@@ -198,7 +198,7 @@ Symbol: ${info['symbol']}
                 
 From {format_mc(start)} ➡️ {format_mc(current)} 🤯
                 
-📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b> | 🖼️ <b><a href="https://t.me/bigsamachievement_bot?start={ca}">View PNL</a></b>
+📊 <b><a href="https://dexscreener.com/solana/{ca}">View Stats</a></b> | 🖼️ <b><a href="https://t.me/samlbbot?start={ca}">View PNL</a></b>
 """
                 
                 photo_path = "gifs/general-update.png"  
@@ -258,6 +258,101 @@ async def pnl_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_photo(photo=bio, reply_markup=delete_button(), reply_to_message_id=update.message.message_id)
 
 
+last_sent_day = None
+
+async def auto_daily_report(app):
+    global last_sent_day
+
+    while True:
+        now = datetime.now(timezone.utc)
+
+        if now.hour == 23 and now.minute == 58:
+
+            today = now.date()
+
+            # prevent duplicates
+            if last_sent_day == today:
+                await asyncio.sleep(20)
+                continue
+
+            conn = sqlite3.connect(DB_FILE)
+            cursor = conn.cursor()
+
+            cutoff = datetime(now.year, now.month, now.day, tzinfo=timezone.utc)
+
+            cursor.execute("SELECT ca, name, symbol, multipliers, posted_at FROM tracked")
+            all_rows = cursor.fetchall()
+
+            valid_rows = []
+
+            for ca, name, symbol, multipliers_json, posted_at_raw in all_rows:
+                posted_at = parse_posted_at(posted_at_raw)
+
+                if posted_at and posted_at >= cutoff:
+                    valid_rows.append((ca, name, symbol, multipliers_json))
+
+            calls = []
+            total_return = 0
+            hits = 0
+
+            for ca, name, symbol, multipliers_json in valid_rows:
+                multipliers = json.loads(multipliers_json)
+
+                max_x = max(multipliers) if multipliers else 0
+
+                total_return += max_x
+
+                if max_x >= 2:
+                    hits += 1
+
+                calls.append((max_x, name, symbol, ca))
+
+            calls.sort(reverse=True, key=lambda x: x[0])
+
+            total_calls = len(calls)
+            average_return = total_return / total_calls if total_calls else 0
+            hit_rate = hits / total_calls if total_calls else 0
+
+            top_10 = calls[:10]
+
+            lines = [
+                "📊 <b>DAILY VIP REPORT</b>",
+                f"├ Calls: <b>{total_calls}</b>",
+                f"├ Hit Rate: <b>{hit_rate:.0%}</b>",
+                f"└ Return: <b>{total_return:.1f}x</b>\n"
+            ]
+
+            for i, (max_x, name, symbol, ca) in enumerate(top_10, 1):
+                lines.append(
+                    f"{i}. <a href='https://dexscreener.com/solana/{ca}'>${symbol}</a> — <b>{max_x}x</b>"
+                )
+
+            report = "\n".join(lines)
+
+            photo_path = "gifs/daily-report.png"
+
+            if os.path.exists(photo_path):
+                await app.bot.send_photo(
+                    chat_id=VIP_CHANNEL_ID,
+                    photo=open(photo_path, "rb"),
+                    caption=report,
+                    parse_mode=ParseMode.HTML
+                )
+            else:
+                await app.bot.send_message(
+                    chat_id=VIP_CHANNEL_ID,
+                    text=report,
+                    parse_mode=ParseMode.HTML,
+                    disable_web_page_preview=True
+                )
+
+            last_sent_day = today
+            conn.close()
+
+            await asyncio.sleep(60)
+
+        await asyncio.sleep(20)
+        
 async def delete_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()  # Acknowledge the callback
@@ -305,7 +400,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE,):
             await update.message.reply_photo(photo=bio)
     else:
         await update.message.reply_text(
-            "Welcome to BIG SAM PUMPFUN VIP ALERT ACHIEVEMENT BOT (Still on Beta Mode)!\n\n"
+            "Welcome to THE SAM CHANNEL ACHIEVEMENT BOT!!\n\n"
             "Use /pnl <contract_address> to flex our calls."
         )
 
@@ -423,19 +518,19 @@ async def leaderboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     hit_rate = hits / total_calls if total_calls else 0
     top_10 = calls[:10]
     
-    bot_username = "bigsamachievement_bot"  # replace with your bot's username without @
+    bot_username = "samlbbot"  # replace with your bot's username without @
     timeframe_for_link = timeframe_arg if timeframe_arg else "1d"
 
     header_link = (
     f'<b><a href="https://t.me/{bot_username}?start=gpnl_{timeframe_for_link}">'
-    "PUMPFUN VIP ALERT 💎👾⚡️</a></b>"
+    "SAM BOT CHANNEL</a></b>"
 )
 
 
     # Your existing lines for stats
     lines = [
     f"🏰 {header_link}\n",
-    "📊 <b>PUMPFUN VIP STATS</b>",
+    "📊 <b>CHANNEL STATS</b>",
     f" ├ <code>Period</code>: <b>{timeframe_arg}</b>",
     f" ├ <code>Calls</code>: <b>{total_calls}</b>",
     f" ├ <code>Hit Rate</code>: <b>{hit_rate:.0%}</b>",
@@ -448,10 +543,10 @@ async def leaderboard_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     for i, (max_x, name, symbol, ca) in enumerate(top_10, 1):
         emoji = emojis[i-1]
         url = f"https://dexscreener.com/solana/{ca}"
-        blockquote_lines.append(f"<b>{emoji}{i}. <a href='{url}'>${symbol}</a> » PUMPFUN VIP ALERT 💎👾⚡️ [{max_x:}x]</b>")
+        blockquote_lines.append(f"<b>{emoji}{i}. <a href='{url}'>${symbol}</a> » SAM BOT [{max_x:}x]</b>")
         
     lines.append("<blockquote>" + "\n".join(blockquote_lines) + "\n</blockquote>")
-    lines.append(f'\n<b><a href="https://x.com/bigsamkoll">📚 Learn More...</a></b>')
+    lines.append(f'\n<b><a href="https://x.com/devbigsam">📚 Learn More...</a></b>')
 
         
     quote_text = "\n".join(lines); "\n"
@@ -565,11 +660,16 @@ def main():
 
     app.add_handler(CallbackQueryHandler(delete_callback, pattern="^delete$"))
 
-    app.add_handler(MessageHandler(filters.Chat(VIP_CHANNEL_ID) & filters.TEXT, handle_vip_message))
-
+    app.add_handler(
+   MessageHandler(
+    filters.Chat(VIP_CHANNEL_ID) & (~filters.COMMAND),
+    handle_vip_message
+)
+)
     # Start background tasks after bot is running
     async def on_startup(app):
         asyncio.create_task(monitor_multipliers(app))
+        asyncio.create_task(auto_daily_report(app))
 
     app.post_init = on_startup
 

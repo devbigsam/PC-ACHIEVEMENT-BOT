@@ -32,7 +32,7 @@ def generate_gpnl_image(top_calls, total_calls, hit_rate, avg_return, median_ret
     img_w, img_h = base_img.size
 
     # HEADER
-    header_text = "PUMPFUN VIP ALERT"
+    header_text = "BIG SAM BOT CHANNEL P&L"
     bbox = draw.textbbox((0, 0), header_text, font=title_font)
     header_x = (img_w - (bbox[2] - bbox[0])) / 2
     draw.text((header_x, 40), header_text, font=title_font, fill=GREEN)
@@ -48,7 +48,7 @@ def generate_gpnl_image(top_calls, total_calls, hit_rate, avg_return, median_ret
     spacing = 80
     
     for max_x, name, symbol, ca in top_calls[:3]:
-        call_text = f"VIP ALERT : ${symbol.upper()}"
+        call_text = f"SAM BOT : ${symbol.upper()}"
         call_bbox = draw.textbbox((0, 0), call_text, font=call_font)
         call_width = call_bbox[2] - call_bbox[0]
 

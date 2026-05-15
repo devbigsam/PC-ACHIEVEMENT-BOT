@@ -35,7 +35,7 @@ def get_text_size(draw, text, font):
 
 async def generate_pnl_image(ca_data):
     # Pick random template
-    template_num = random.randint(1, 10)
+    template_num = random.randint(1, 12)
     template_path = f"pnl_templates/pnl_template_{template_num}.png"
 
     if not os.path.exists(template_path):
@@ -60,7 +60,7 @@ async def generate_pnl_image(ca_data):
     mc_text = f"Called at {format_mc(ca_data['initial_mc'])}"
     max_mult = max(ca_data["multipliers"]) if ca_data["multipliers"] else 1
     mult_text = f"{max_mult}x"
-    footer_text = "PUMPFUN VIP ALERT"  # No emoji here, we will paste the emoji image
+    footer_text = "SAM PF CALL BOT"  # No emoji here, we will paste the emoji image
 
     width, height = image.size
 
